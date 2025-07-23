@@ -13,7 +13,7 @@
       <button id="showRegister" class="px-4 py-2 bg-gray-300 text-black rounded-r">Register</button>
     </div>
 
-    
+   
     <form id="loginForm" class="space-y-4">
       <h2 class="text-2xl font-bold mb-4 text-center">Login</h2>
       <input class="w-full px-4 py-2 border rounded" type="email" id="loginEmail" placeholder="Email" required />
@@ -40,7 +40,7 @@
     const showRegister = document.getElementById('showRegister');
     const responseMsg = document.getElementById('responseMsg');
 
-   
+    
     showLogin.addEventListener('click', () => {
       loginForm.classList.remove('hidden');
       registerForm.classList.add('hidden');
@@ -63,7 +63,7 @@
       const email = document.getElementById('loginEmail').value;
       const password = document.getElementById('loginPassword').value;
 
-      const res = await fetch('/api/login', {
+      const res = await fetch('https://auth-app-9g7v.onrender.com/api/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password })
@@ -72,8 +72,7 @@
       const data = await res.json();
       if (res.ok) {
         localStorage.setItem('token', data.token);
-        responseMsg.textContent = 'Login successful!';
-        responseMsg.className = 'text-green-600 mt-4 text-center';
+        fetchCurrentUser();
       } else {
         responseMsg.textContent = data.message || 'Login failed';
         responseMsg.className = 'text-red-600 mt-4 text-center';
@@ -87,7 +86,7 @@
       const email = document.getElementById('regEmail').value;
       const password = document.getElementById('regPassword').value;
 
-      const res = await fetch('/api/register', {
+      const res = await fetch('https://auth-app-9g7v.onrender.com/api/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name, email, password })
@@ -98,12 +97,29 @@
         responseMsg.textContent = 'Registration successful! You can now log in.';
         responseMsg.className = 'text-green-600 mt-4 text-center';
         registerForm.reset();
-        showLogin.click();
+        showLogin.click(); 
       } else {
         responseMsg.textContent = data.message || 'Registration failed';
         responseMsg.className = 'text-red-600 mt-4 text-center';
       }
     });
+
+   
+    async function fetchCurrentUser() {
+      const token = localStorage.getItem('token');
+      const res = await fetch('https://auth-app-9g7v.onrender.com/api/me', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      const data = await res.json();
+      if (res.ok) {
+        responseMsg.textContent = `Welcome, ${data.name} (${data.email})`;
+        responseMsg.className = 'text-green-600 mt-4 text-center';
+      } else {
+        responseMsg.textContent = data.message || 'Failed to fetch user';
+        responseMsg.className = 'text-red-600 mt-4 text-center';
+      }
+    }
   </script>
 </body>
 </html>
